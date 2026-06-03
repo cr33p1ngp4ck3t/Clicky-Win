@@ -1,0 +1,251 @@
+/* Status bar — Dynamic-Island-style floating pill at the top of the screen.
+ *
+ * Changes size, gradient, and content based on voice state.
+ * Ported from macOS OverlayWindow.swift waveform/spinner/triangle visuals.
+ */
+
+html,
+body,
+#root {
+  background: transparent;
+  pointer-events: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+/* ── Root container ──────────────────────────────────────────────── */
+
+.status-bar-root {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+/* ── Pill (the visible bar) ──────────────────────────────────────── */
+
+.status-bar-pill {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #000000;
+  padding: 0 48px;
+  border: 1px solid rgba(128, 128, 128, 0.336);
+  border-radius: 0 0 18px 18px;
+  overflow: hidden;
+  /* Smooth size transitions for dynamic resizing between states */
+  transition:
+    width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+    height 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+    padding 0.3s ease;
+}
+
+/* ── Size variants per state ─────────────────────────────────────── */
+
+.status-bar-pill.state-idle {
+  width: 180px;
+  height: 42px;
+  padding: 0 20px;
+}
+
+.status-bar-pill.state-listening {
+  width: 240px;
+  height: 42px;
+  padding: 0 20px;
+}
+
+.status-bar-pill.state-processing {
+  width: 220px;
+  height: 42px;
+  padding: 0 20px;
+}
+
+.status-bar-pill.state-responding {
+  width: 260px;
+  height: 42px;
+  padding: 0 22px;
+}
+
+/* ── Gradient glow border (rendered as pseudo-element behind pill) ── */
+
+.status-bar-pill::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 30px;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+/* Blue gradient for listening */
+.status-bar-pill.state-listening::before {
+  background: linear-gradient(135deg,#60a5fa, #3380ff);
+  opacity: 0.7;
+  filter: blur(4px);
+  animation: gradient-rotate 3s linear infinite;
+}
+
+/* Purple-pink gradient for processing */
+.status-bar-pill.state-processing::before {
+  background: linear-gradient(135deg, #8F46EB, #E84D9E, #FF8C33);
+  opacity: 0.7;
+  animation: gradient-rotate 2s linear infinite;
+}
+
+/* Blue-to-purple gradient for speaking */
+.status-bar-pill.state-responding::before {
+  background: linear-gradient(135deg, #3380ff, #8F46EB, #E84D9E);
+  opacity: 0.8;
+  animation: gradient-rotate 2.5s linear infinite, speaking-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes gradient-rotate {
+  0% { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(360deg); }
+}
+
+@keyframes speaking-pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+/* ── Inner glow blobs ───────────────────────────────────────────── */
+
+.status-bar-glow {
+  position: absolute;
+  width: 60px;
+  height: 30px;
+  border-radius: 50%;
+  filter: blur(20px);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+
+.status-bar-glow.glow-left {
+  left: 10%;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.status-bar-glow.glow-right {
+  right: 10%;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Glow colors per state */
+.state-listening .status-bar-glow { opacity: 0.5; background: #3380ff; }
+.state-processing .status-bar-glow.glow-left { opacity: 0.4; background: #8F46EB; }
+.state-processing .status-bar-glow.glow-right { opacity: 0.4; background: #FF8C33; }
+.state-responding .status-bar-glow.glow-left { opacity: 0.5; background: #3380ff; }
+.state-responding .status-bar-glow.glow-right { opacity: 0.5; background: #E84D9E; }
+
+/* ── Label ───────────────────────────────────────────────────────── */
+
+.status-bar-label {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  z-index: 1;
+}
+
+/* ── Status dot (only visible in idle state) ─────────────────────── */
+
+.status-bar-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  z-index: 1;
+}
+
+.status-bar-dot.idle {
+  background: #34D399;
+  box-shadow: 0 0 6px rgba(52, 211, 153, 0.6);
+  animation: pulse-glow 2s infinite ease-in-out;
+}
+@keyframes pulse-glow {
+  0%   { opacity: 0.5; box-shadow: 0 0 6px; }
+  50%  { opacity: 1;   box-shadow: 0 0 14px; }
+  100% { opacity: 0.4; box-shadow: 0 0 6px; }
+}
+
+/* ── Waveform bars (listening state) ─────────────────────────────── */
+/* 5 bars, symmetric arch [0.4, 0.7, 1.0, 0.7, 0.4], matching macOS */
+
+.status-bar-waveform {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 16px;
+  z-index: 1;
+}
+
+.status-bar-waveform-bar {
+  width: 3px;
+  border-radius: 2px;
+  background: #3380ff;
+  box-shadow: 0 0 6px rgba(51, 128, 255, 0.6);
+  /* Height set by JS inline style; transition smooths frame-to-frame */
+  transition: height 0.05s ease-out;
+}
+
+/* ── Spinner (processing state) ──────────────────────────────────── */
+
+.status-bar-spinner {
+  width: 16px;
+  height: 16px;
+  z-index: 1;
+  animation: spin 0.8s linear infinite;
+}
+
+.status-bar-spinner circle {
+  fill: none;
+  stroke: url(#spinner-gradient);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ── Speaking waveform (responding state) ────────────────────────── */
+/* A more dramatic waveform with gradient colors for the speaking state */
+
+.status-bar-speaking-wave {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 20px;
+  z-index: 1;
+}
+
+.status-bar-speaking-bar {
+  width: 3px;
+  height: 24px;
+  border-radius: 2px;
+  background: #3380ff; /* inherit from parent */
+  box-shadow: 0 0 8px currentColor;
+  animation: speaking-wave 0.6s ease-in-out infinite;
+}
+
+.status-bar-speaking-bar:nth-child(1) { animation: speaking-wave 1s ease-in-out infinite 0.12s; }
+.status-bar-speaking-bar:nth-child(2) { animation: speaking-wave 1.4s ease-in-out infinite 0.65s; }
+.status-bar-speaking-bar:nth-child(3) { animation: speaking-wave 4s ease-in-out infinite 0.4s; }
+.status-bar-speaking-bar:nth-child(4) { animation: speaking-wave 3s ease-in-out infinite 2s; }
+.status-bar-speaking-bar:nth-child(5) { animation: speaking-wave 2s ease-in-out infinite 0.12s; }
+
+@keyframes speaking-wave {
+  0%, 100% { height: 4px; }
+  50% { height: 22px; }
+}

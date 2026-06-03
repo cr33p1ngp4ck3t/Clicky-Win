@@ -1,0 +1,74 @@
+/* Clicky design system — color/spacing/typography tokens.
+ * Ported from leanring-buddy/DesignSystem.swift (in spirit, not line-by-line).
+ * Both the panel and overlay renderers import this.
+ */
+
+:root {
+  /* Colors — dark aesthetic matching the macOS panel */
+  --clicky-bg: rgba(28, 28, 32, 0.92);
+  --clicky-bg-solid: #1c1c20;
+  --clicky-surface: rgba(255, 255, 255, 0.06);
+  --clicky-surface-hover: rgba(255, 255, 255, 0.1);
+  --clicky-border: rgba(255, 255, 255, 0.08);
+
+  --clicky-text-primary: rgba(255, 255, 255, 0.95);
+  --clicky-text-secondary: rgba(255, 255, 255, 0.65);
+  --clicky-text-muted: rgba(255, 255, 255, 0.4);
+
+  --clicky-accent: #4d9fff;
+  --clicky-accent-dim: rgba(77, 159, 255, 0.5);
+  --clicky-cursor-blue: #3380ff;
+
+  --clicky-success: #4ade80;
+  --clicky-warn: #fbbf24;
+  --clicky-error: #f87171;
+
+  /* Spacing */
+  --clicky-space-1: 4px;
+  --clicky-space-2: 8px;
+  --clicky-space-3: 12px;
+  --clicky-space-4: 16px;
+  --clicky-space-5: 20px;
+  --clicky-space-6: 24px;
+
+  /* Radii */
+  --clicky-radius-sm: 6px;
+  --clicky-radius-md: 10px;
+  --clicky-radius-lg: 14px;
+  --clicky-radius-xl: 18px;
+
+  /* Type */
+  --clicky-font:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --clicky-size-xs: 11px;
+  --clicky-size-sm: 13px;
+  --clicky-size-md: 14px;
+  --clicky-size-lg: 16px;
+  --clicky-size-xl: 20px;
+}
+
+/* Base reset for both renderers */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  font-family: var(--clicky-font);
+  color: var(--clicky-text-primary);
+  background: transparent;
+  -webkit-font-smoothing: antialiased;
+  -webkit-user-select: none;
+  user-select: none;
+  /* Disable rubber-band overscroll inside the panel/overlay */
+  overflow: hidden;
+}
+
+#root {
+  width: 100vw;
+  height: 100vh;
+}

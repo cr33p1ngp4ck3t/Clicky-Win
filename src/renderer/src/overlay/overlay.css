@@ -1,0 +1,110 @@
+/* Overlay surface: a click-through transparent canvas spanning the
+ * virtual screen. Nothing here paints unless we put it there — the
+ * BrowserWindow's transparent: true + setIgnoreMouseEvents(true) means
+ * any visible pixel renders on top of every other window.
+ */
+
+html,
+body,
+#root {
+  background: transparent;
+  pointer-events: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.overlay-root {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── Cursor container ─────────────────────────────────────────────── */
+/* All three visual states (triangle, waveform, spinner) live inside
+ * this positioned container. They cross-fade via opacity transitions. */
+
+.overlay-cursor-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 20px;
+  height: 20px;
+  will-change: transform, opacity;
+  pointer-events: none;
+  transition: opacity 0.25s ease-out;
+}
+
+/* Each visual layer sits on top of each other via absolute positioning.
+ * Only one is visible at a time; the rest have opacity: 0. */
+.overlay-visual-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  transition: opacity 0.2s ease-in;
+}
+
+/* ── Triangle cursor ─────────────────────────────────────────────── */
+
+.overlay-visual-layer svg {
+  will-change: transform, filter;
+}
+
+/* ── Waveform bars (listening state) ──────────────────────────────── */
+/* 5 bars, symmetric profile [0.4, 0.7, 1.0, 0.7, 0.4] */
+
+.overlay-waveform {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 16px;
+}
+
+.overlay-waveform-bar {
+  width: 2px;
+  border-radius: 1.5px;
+  background: #3380ff;
+  box-shadow: 0 0 6px rgba(51, 128, 255, 0.6);
+  /* Height set by JS inline style; transition smooths frame-to-frame */
+  transition: height 0.05s ease-out;
+}
+
+/* ── Spinner (processing state) ──────────────────────────────────── */
+
+.overlay-spinner {
+  animation: overlay-spin 0.8s linear infinite;
+}
+
+@keyframes overlay-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ── Speech bubble ───────────────────────────────────────────────── */
+
+.overlay-bubble {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 4px 8px;
+  background: #3380ff;
+  color: white;
+  font-family: var(--clicky-font);
+  font-size: 11px;
+  font-weight: 500;
+  border-radius: 6px;
+  box-shadow: 0 0 16px rgba(51, 128, 255, 0.6);
+  transition:
+    opacity 0.4s ease-out,
+    transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  will-change: transform, opacity;
+  pointer-events: none;
+  white-space: nowrap;
+  transform-origin: top left;
+}
