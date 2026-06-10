@@ -4,23 +4,6 @@ Windows port of [Clicky](https://github.com/cr33p1ngp4ck3t/my-clicky) — an AI 
 
 The original is a Swift/SwiftUI/AppKit macOS app. This is a from-scratch reimplementation in Electron + TypeScript + React, targeting Windows 10/11.
 
-## Status
-
-**v0.0.1 — scaffold only.** Tray icon + dropdown panel + click-through overlay window all wire up correctly. Nothing else is implemented yet.
-
-| Feature | Status |
-|---|---|
-| Tray icon + dropdown panel | ✅ scaffolded |
-| Click-through full-screen overlay | ✅ scaffolded |
-| Push-to-talk global hotkey | ❌ |
-| Audio capture → AssemblyAI streaming STT | ❌ |
-| Multi-monitor screen capture | ✅ `desktopCapturer` wrapper, hides own UI during capture |
-| Claude API (vision + streaming + tool use for pointing) | ✅ service module, end-to-end via debug IPC |
-| ElevenLabs TTS playback | ❌ |
-| Blue cursor + bezier-arc pointing animation | ✅ overlay React+SVG, rAF-driven |
-| Conversation memory across turns | ❌ |
-| Cloudflare Worker proxy | reuses upstream `worker/` verbatim |
-
 ## Stack
 
 - Electron 39
